@@ -6,8 +6,9 @@
 * Operating Systems: `Ubuntu 20.04`.
 * Compiler: `gcc 9.4.0`.
 * `mpich` so `MPI` can be used.
+* Text Editor. E.g. `Visual Studio Code`, `Vim`, `Emacs`, `gedit` etc.
 
-## Installing [MPI](https://www.mpich.org/)
+## Installing MPI
 
 [MPI](https://www.mpich.org/) can either be downloaded via the link provided or at the command-line.
 
