@@ -7,4 +7,23 @@
 * Compiler: `gcc 9.4.0`.
 * `mpich` so `MPI` can be used.
 
-Installing [MPI](https://www.mpich.org/)
+## Installing [MPI](https://www.mpich.org/)
+
+[MPI](https://www.mpich.org/) can either be downloaded via the link provided or at the command-line.
+
+* `$ sudo apt-get install mpich`
+
+## Running the Application
+
+* `$ git clone https://github.com/MRLintern/1D_Wave-Equation-MPI.git`
+* `$ chmod +x wave.sh`
+* `$ ./main_w`
+
+## Results
+
+The results of the calculations are printed to `results.txt`. These are included.
+
+## Additional
+
+Vary the number of processors used and the different compiler optimisation flags. 
+A plot with the different speed-up values using different numbers of processors and compiler optimisation flags is included.
