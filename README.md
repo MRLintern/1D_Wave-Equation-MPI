@@ -22,7 +22,7 @@
 
 ## Results
 
-The results of the calculations are printed to `results.txt`. These are included.
+The results of the calculations are printed to `results.txt`. 
 
 ## Additional
 
