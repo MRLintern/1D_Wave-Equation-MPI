@@ -1,3 +1,7 @@
+## Note:
+
+Software is currently being redeveloped. Once its all sorted, it'll appear here.
+
 ## 1D_Wave-Equation-MPI
 1D Wave Equation Discretized using Finite Differences and Solved via Parallelizing the Jacobi Method with MPI
 
