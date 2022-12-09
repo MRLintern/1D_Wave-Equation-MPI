@@ -425,7 +425,7 @@ void collect ( int id, int p, int n_global, int n_local, int nsteps, double dt, 
 }
 /******************************************************************************/
 
-double exact ( double x, double t )
+double exact(double x, double t)
 
 /******************************************************************************/
 /*
@@ -489,7 +489,7 @@ void timestamp()
 
   strftime(time_buffer, TIME_SIZE, "%d %B %Y %I:%M:%S %p", tm);
 
-  printf ("%s\n", time_buffer);
+  printf("%s\n", time_buffer);
 
   return;
   
