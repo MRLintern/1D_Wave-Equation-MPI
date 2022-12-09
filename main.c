@@ -51,7 +51,7 @@ u(i,n+1) = -u(i,n-1) + 2u(i,n) + C^2(u(i+1,n) - 2u(i,n) + u(i-1,n))
 //--function declarations--//
 ////////////////////////////
 
-double *update(int id, int p, int n_global, int n_local, int nsteps, double dt);
+double* update(int id, int p, int n_global, int n_local, int nsteps, double dt);
 void collect(int id, int p, int n_global, int n_local, int nsteps, double dt, double u_local[]);
 double dudt(double x, double t);
 double exact(double x, double t);
