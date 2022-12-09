@@ -23,6 +23,7 @@ Software is currently being redeveloped. Once its all sorted, it'll appear here.
 * `$ git clone https://github.com/MRLintern/1D_Wave-Equation-MPI.git`
 * `$ chmod +x wave.sh`
 * `$ ./main_w`
+* or `$ bash main_w`
 
 ## Results
 
