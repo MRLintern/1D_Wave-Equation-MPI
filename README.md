@@ -7,7 +7,7 @@ The parallel strategy used is Domain Decomposition.
 The problem (global domain) is decomposed into smaller domains (processes). "Workers" in the subdomains perform the calculations
 and then communicate the results with the master (global domain). This [link](https://www.mcs.anl.gov/research/projects/mpi/tutorial/mpiexmpl/src2/io/C/main.html) provides a basic example behind the Master/Slave concept.
 
-## Background: Wave Equation (a)
+## Background: Wave Equation (A)
 
 The Wave Equation takes the form:
 
@@ -44,7 +44,7 @@ After some algebra and simplification, we end up with the final finite differenc
 
 where `n` represents the nodes in the time direction and `i` represents the nodes in the spacial direction.
 
-## Background: Wave Equation (b)
+## Background: Wave Equation (B)
 
 In the last equation, the term `alpha` was introduced. This represents the `Courant–Friedrichs–Lewy condition`.
 It takes the form:
