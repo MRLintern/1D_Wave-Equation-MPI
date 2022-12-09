@@ -83,7 +83,7 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 * `$ git clone https://github.com/MRLintern/1D_Wave-Equation-MPI.git`
 * `$ chmod +x wave.sh`
 * `$ ./main_w`
-* of `$ bash main_w`
+* or `$ bash main_w`
 
 ## Results
 
