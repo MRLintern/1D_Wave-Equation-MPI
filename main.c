@@ -142,7 +142,7 @@ int main ( int argc, char *argv[] )
 }
 /******************************************************************************/
 
-double *update(int id, int p, int n_global, int n_local, int nsteps, double dt) 
+double* update(int id, int p, int n_global, int n_local, int nsteps, double dt) 
 
 /******************************************************************************/
 /*
@@ -181,14 +181,14 @@ double *update(int id, int p, int n_global, int n_local, int nsteps, double dt)
   {
     if (id == 0)
     {
-      fprintf(stderr, "\n");
+      fprintf(stderr,"\n");
       fprintf(stderr, "UPDATE - Warning!\n");
-      fprintf(stderr, "  1 <= |ALPHA| = | C * dT / dX |.\n");
-      fprintf(stderr, "  C = %g\n", c);
-      fprintf(stderr, "  dT = %g\n", dt);
-      fprintf(stderr, "  dX = %g\n", dx);
-      fprintf(stderr, "  ALPHA = %g\n", alpha);
-      fprintf(stderr, "  Computation will not be stable!\n");
+      fprintf(stderr, "1 <= |ALPHA| = | C * dT / dX |.\n");
+      fprintf(stderr, "C = %g\n", c);
+      fprintf(stderr, "dT = %g\n", dt);
+      fprintf(stderr, "dX = %g\n", dx);
+      fprintf(stderr, "ALPHA = %g\n", alpha);
+      fprintf(stderr, "Computation will not be stable!\n");
     }
     MPI_Finalize();
     exit(1);
@@ -198,7 +198,7 @@ double *update(int id, int p, int n_global, int n_local, int nsteps, double dt)
   Each process stores about 1/P of the total + 2 extra slots.
 */
   i_global_lo = (id*(n_global - 1))/p;
-  i_global_hi = (( id + 1)*(n_global - 1))/p;
+  i_global_hi = ((id + 1)*(n_global - 1))/p;
   
   if (0 < id)
   {
