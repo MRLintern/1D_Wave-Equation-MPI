@@ -49,40 +49,60 @@ u(i,n+1) = -u(i,n-1) + 2u(i,n) + C^2(u(i+1,n) - 2u(i,n) + u(i-1,n))
 #include<mpi.h>
 
 //--function declarations--//
-////////////////////////////
 
+//function to advance/move solution to the next time-step
 double* update(int id, int p, int n_global, int n_local, int nsteps, double dt);
+
+//function to send calculated data from the local process to the master process
 void collect(int id, int p, int n_global, int n_local, int nsteps, double dt, double u_local[]);
+
+//for evaluating time derivative of the solution
 double dudt(double x, double t);
+
+//function to evaluate exact solution
 double exact(double x, double t);
+
+//function for time considerations
 void timestamp();
 
-/******************************************************************************/
 
-int main ( int argc, char *argv[] )
 
-/******************************************************************************/
-
+int main (int argc, char *argv[])
 {
+  
+  //time step
   double dt = 0.00125;
-  int i_global_hi;
-  int i_global_lo;
+  int i_master_hi;
+  int i_master_lo;
+  
+  //MPI process I.D.
   int id;
-  int n_global = 401;
-  int n_local;
-  int nsteps = 4000;
+  int master_num_nodes = 401;
+  int local_num_nodes;
+  
+   //number of time steps
+  int num_dt = 4000;
+  
+  //number of processors
   int p;
+  
+  //local process array solution
   double *u1_local;
+  
+  //wall clock time
   double wtime;
-/* 
-  Initialize MPI.
-*/
-  MPI_Init(&argc, &argv);
 
+  //Initialize MPI session
+  MPI_Init(&argc, &argv);
+  
+  //returns the calling process's I.D.
   MPI_Comm_rank(MPI_COMM_WORLD, &id);
 
+  //total number of processes
   MPI_Comm_size(MPI_COMM_WORLD, &p);
 
+  //tell user about the number processors used, the number of time steps and the total number of nodes used by the master process
+  
   if (id == 0) 
   {
     timestamp();
@@ -91,46 +111,42 @@ int main ( int argc, char *argv[] )
     printf("Using %d time steps of size %g.\n", nsteps, dt);
   }
 
+  //calculate wall clock time
   wtime = MPI_Wtime();
-/*
-  Determine N_LOCAL.
-*/
-  i_global_lo = (id*(n_global - 1))/p;
-  i_global_hi = ((id + 1)*(n_global - 1))/p;
+
+ //--Determine the number of nodes for local process
+
+  i_master_lo = (id*(master_num_nodes - 1))/p;
+  i_master_hi = ((id + 1)*(master_num_nodes - 1))/p;
   
   if (0 < id)
   {
-    i_global_lo = i_global_lo - 1;
+    i_master_lo = i_master_lo - 1;
   }
-  n_local = i_global_hi + 1 - i_global_lo;
-/* 
-  Update N_LOCAL values.
-*/
-  u1_local = update(id, p, n_global, n_local, nsteps, dt);
-/* 
-  Collect local values into global array.
-*/
-  collect(id, p, n_global, n_local, nsteps, dt, u1_local);
-/*
-  Report elapsed wallclock time.
-*/
+  local_num_nodes = i_master_hi + 1 - i_master_lo;
+
+  //update the local process nodes
+  u1_local = update(id, p, master_num_nodes, local_num_nodes, num_dt, dt);
+  
+  //now collect the local values put them into master process/array
+  collect(id, p, master_num_nodes, local_num_nodes, num_dt, dt, u1_local);
+
+  //report wall clock time
   wtime = MPI_Wtime() - wtime;
+  
   if (id == 0)
   {
     printf("\n");
     printf("Elapsed wallclock time was %g seconds\n", wtime);
   }
-/*
-  Terminate MPI.
-*/
+
+  //terminate the MPI session
   MPI_Finalize();
-/*
-  Free memory.
-*/
+
+  //free the memory assigned to local process solution
   free(u1_local);
-/*
-  Terminate.
-*/
+
+  //terminate the main function
   if (id == 0)
   {
     printf("\n");
@@ -140,132 +156,164 @@ int main ( int argc, char *argv[] )
 
   return 0;
 }
-/******************************************************************************/
 
-double* update(int id, int p, int n_global, int n_local, int nsteps, double dt) 
-
-/******************************************************************************/
-/*
-  Purpose:
-
-    UPDATE advances the solution a given number of time steps.
-
-*/
+//function to advance/move solution to the next time-step
+double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num_dt, double dt) 
 {
-  double alpha;
-  double c;
+  //Courant–Friedrichs–Lewy (CFL) condition
+  double CFL; 
+  
+  //speed of wave
+  double wave_speed;
+  
+  //spacial step between nodes
   double dx;
-  int i;
-  int i_global;
-  int i_global_hi;
-  int i_global_lo;
+  
+  //n represents the nodes in the time domain
+  int n;
+  
+  int i_master;
+  int i_master_hi;
+  int i_master_lo;
   int i_local;
   int i_local_hi;
   int i_local_lo;
-  int ltor = 20;
-  int rtol = 10;
+  
+  //used for transfer data between adjacent processes
+  int ltor = 20; //left-to-right
+  int rtol = 10; //right-to-left
+  
+  //MPI_Status represents the status of a reception operation
   MPI_Status status;
+  
+  //time time
   double t;
+  
+  //local solution arrays
   double *u0_local;
   double *u1_local;
   double *u2_local;
+  
+  //space point
   double x;
 /*
-  Determine the value of ALPHA.
-*/
-  c = 1.0;
-  dx = 1.0/(double)(n_global - 1);
-  alpha = c*dt/dx;
+  Determine the value of the Courant–Friedrichs–Lewy (CFL) condition:
+  
+  if 1 <= CFL, the solution is unstable; warn user.
 
-  if (1.0 <= fabs(alpha))
+  when 1 <= CFL, the time step is too large which means
+  solutions won't be calculated at every node in the mesh
+
+*/
+  wave_speed = 1.0;
+  
+  //spacial step
+  dx = 1.0/(double)(master_num_nodes - 1);
+  
+  //now calculate the CFL condition
+  CFL = wave_speed*dt/dx;
+
+  //check for solution stability
+  if (1.0 <= fabs(CFL))
   {
     if (id == 0)
     {
       fprintf(stderr,"\n");
       fprintf(stderr, "UPDATE - Warning!\n");
-      fprintf(stderr, "1 <= |ALPHA| = | C * dT / dX |.\n");
+      fprintf(stderr, "1 <= |CFL| = | C * dT / dX |.\n");
       fprintf(stderr, "C = %g\n", c);
       fprintf(stderr, "dT = %g\n", dt);
       fprintf(stderr, "dX = %g\n", dx);
-      fprintf(stderr, "ALPHA = %g\n", alpha);
+      fprintf(stderr, "CFL = %g\n", CFL);
       fprintf(stderr, "Computation will not be stable!\n");
     }
+    
+    //terminate MPI process
     MPI_Finalize();
+    
     exit(1);
   }
 /*
-  The global array of N_GLOBAL points must be divided up among the processes.
-  Each process stores about 1/P of the total + 2 extra slots.
+  
+    to make use of our parallel strategy, domain decomposition, the master process
+    must be divided into smaller processes.
+    Each process stores about 1/p of the total + 2 extra slots
+    
 */
-  i_global_lo = (id*(n_global - 1))/p;
-  i_global_hi = ((id + 1)*(n_global - 1))/p;
+  i_master_lo = (id*(master_num_nodes - 1))/p;
+  i_master_hi = ((id + 1)*(master_num_nodes - 1))/p;
   
   if (0 < id)
   {
-    i_global_lo = i_global_lo - 1;
+    i_master_lo = i_master_lo - 1;
   }
 
   i_local_lo = 0;
-  i_local_hi = i_global_hi - i_global_lo;
+  i_local_hi = i_master_hi - i_master_lo;
 
-  u0_local = (double*)malloc(n_local*sizeof(double));
-  u1_local = (double*)malloc(n_local*sizeof(double));
-  u2_local = (double*)malloc(n_local*sizeof(double));
+  u0_local = (double*)malloc(local_num_nodes*sizeof(double));
+  u1_local = (double*)malloc(local_num_nodes*sizeof(double));
+  u2_local = (double*)malloc(local_num_nodes*sizeof(double));
 
+  //starting at t = 0, we calculate the 1st spacial node value
   t = 0.0;
   
-  for (i_global = i_global_lo; i_global <= i_global_hi; i_global++) 
+  //for the master process
+  for (i_master = i_master_lo; i_master <= i_master_hi; i_master++) 
   {
-    x = (double)(i_global)/(double)(n_global - 1);
-    i_local = i_global - i_global_lo;
+    x = (double)(i_master)/(double)(master_num_nodes - 1);
+    
+    i_local = i_master - i_master_lo;
+    
+    //local solution
     u1_local[i_local] = exact(x, t);
   }
 
+  //for the local process
   for (i_local = i_local_lo; i_local <= i_local_hi; i_local++)
   {
     u0_local[i_local] = u1_local[i_local];
   }
-/* 
-  Take NSTEPS time steps.
-*/
-  for (i = 1; i <= nsteps; i++)
+  
+  //time considerations. we have n nodes in the time domain
+  //we now start iterating through all the time steps (4000)
+  for (n = 1; n <= num_dt; i++)
   {
-    t = dt*(double)i;
-/* 
-  For the first time step, we need to use the initial derivative information.
-*/
+    t = dt*(double)n;
+
+  //For the first time step, we need to use the initial derivative information.
     if (i == 1)
     {
       for (i_local = i_local_lo + 1; i_local < i_local_hi; i_local++) 
       {
-        i_global = i_global_lo + i_local;
-        x = (double)(i_global)/(double)(n_global - 1);
+        i_master = i_master_lo + i_local;
+        x = (double)(i_master)/(double)(master_num_nodes - 1);
         u2_local[i_local] = 
           
-          + 0.5*alpha*alpha*u1_local[i_local-1]
-          + (1.0 - alpha*alpha)*u1_local[i_local] 
-          +  0.5*alpha*alpha*u1_local[i_local+1]
+          + 0.5*CFL**2*u1_local[i_local-1]
+          + (1.0 - CFL**2)*u1_local[i_local] 
+          +  0.5*CFL**2*u1_local[i_local+1]
           +  dt*dudt(x, t);
       }
     }
-/* 
-  After the first time step, we can use the previous two solution estimates.
-*/
+
+  //now we can use the 2 previous solutions to calculate the next one
+
     else
     {
       for (i_local = i_local_lo + 1; i_local < i_local_hi; i_local++) 
       {
         u2_local[i_local] =
           
-          + alpha*alpha*u1_local[i_local-1]
-          + 2.0*(1.0 - alpha*alpha)*u1_local[i_local] 
-          + alpha*alpha*u1_local[i_local+1]
+          + CFL**2*u1_local[i_local-1]
+          + 2.0*(1.0 - CFL**2)*u1_local[i_local] 
+          + CFL**2*u1_local[i_local+1]
           - u0_local[i_local];
       }
     }
-/* 
-  Exchange data with "left-hand" neighbor. 
-*/
+
+  //Exchange data with "left-hand" neighbour/process
+
     if (0 < id) 
     {
       MPI_Send(&u2_local[i_local_lo+1], 1, MPI_DOUBLE, id - 1, rtol, MPI_COMM_WORLD);
@@ -274,10 +322,11 @@ double* update(int id, int p, int n_global, int n_local, int nsteps, double dt)
     else
     {
       x = 0.0;
+      
       u2_local[i_local_lo] = exact(x, t);
     }
 /* 
-  Exchange data with "right-hand" neighbor.
+  Exchange data with "right-hand" neighbour/process
 */
     if (id < p - 1) 
     {
@@ -298,41 +347,34 @@ double* update(int id, int p, int n_global, int n_local, int nsteps, double dt)
       u1_local[i_local] = u2_local[i_local];
     }
   }
-/*
-  Free memory.
-*/
+
+  //Free memory.
   free(u0_local);
   free(u2_local);
 
   return u1_local;
-}
-/******************************************************************************/
-
-void collect ( int id, int p, int n_global, int n_local, int nsteps, double dt, double u_local[]) 
-
-/******************************************************************************/
-/*
-  Purpose:
-
-    COLLECT has workers send results to the master, which prints them.
-
   
-*/
+}
+
+//send results from the local processes to the master process
+void collect ( int id, int p, int n_global, int n_local, int nsteps, double dt, double u_local[]) 
 {
   int buffer[2];
   int collect1 = 10;
   int collect2 = 20;
   int i;
-  int i_global;
-  int i_global_hi;
-  int i_global_lo;
+  int i_master;
+  int i_master_hi;
+  int i_master_lo;
   int i_local;
   int i_local_hi;
   int i_local_lo;
   int n_local2;
+  
   MPI_Status status;
+  
   double t;
-  double *u_global;
+  double *u_master;
   double x;
 
   i_global_lo = (id*(n_global - 1))/p;
@@ -345,9 +387,8 @@ void collect ( int id, int p, int n_global, int n_local, int nsteps, double dt, 
 
   i_local_lo = 0;
   i_local_hi = i_global_hi - i_global_lo;
-/* 
-  Master collects worker results into the U_GLOBAL array.
-*/
+
+  //master process collects local results into the master solution array         
   if ( id == 0 )
   {
 /*
