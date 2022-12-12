@@ -74,7 +74,7 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 
 ## Installing MPI
 
-[MPI](https://www.mpich.org/) can either be downloaded via the link provided or at the command-line.
+`MPI`can be downloaded [here](https://www.mpich.org/) or at the command line (see below).
 
 * `$ sudo apt-get install mpich`
 
