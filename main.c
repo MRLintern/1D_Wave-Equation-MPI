@@ -219,7 +219,7 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
   solutions won't be calculated at every node in the mesh
 
 */
-  wave_speed = 1.0;
+  double wave_speed = 1.0;
   
   //spacial step
   dx = 1.0/(double)(master_num_nodes - 1);
@@ -234,7 +234,7 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
     {
       fprintf(stderr,"\n");
       fprintf(stderr, "UPDATE - Warning!\n");
-      fprintf(stderr, "1 <= |CFL| = | C * dT / dX |.\n");
+      fprintf(stderr, "1 <= |CFL| = | c * dt / dx |.\n");
       fprintf(stderr, "C = %g\n", c);
       fprintf(stderr, "dT = %g\n", dt);
       fprintf(stderr, "dX = %g\n", dx);
