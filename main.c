@@ -65,8 +65,7 @@ double exact(double x, double t);
 //function for time considerations
 void timestamp();
 
-
-
+//enter the main function
 int main (int argc, char *argv[])
 {
   
