@@ -51,10 +51,10 @@ u(i,n+1) = -u(i,n-1) + 2u(i,n) + C^2(u(i+1,n) - 2u(i,n) + u(i-1,n))
 //--function declarations--//
 
 //function to advance/move solution to the next time-step
-double* update(int id, int p, int n_global, int n_local, int nsteps, double dt);
+double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num_dt, double dt);
 
 //function to send calculated data from the local process to the master process
-void collect(int id, int p, int n_global, int n_local, int nsteps, double dt, double u_local[]);
+void collect(int id, int p, int master_num_nodes, int local_num_nodes, int num_dt, double dt, double u_local[]);
 
 //for evaluating time derivative of the solution
 double dudt(double x, double t);
@@ -72,12 +72,18 @@ int main (int argc, char *argv[])
   
   //time step
   double dt = 0.00125;
-  int i_master_hi;
-  int i_master_lo;
+  
+  //--master process arrays
+  int i_master_max; //max value
+  int i_master_min; //min value
   
   //MPI process I.D.
   int id;
+  
+  //number of nodes for master process
   int master_num_nodes = 401;
+  
+  //number of nodes for local process
   int local_num_nodes;
   
    //number of time steps
@@ -107,8 +113,8 @@ int main (int argc, char *argv[])
   {
     timestamp();
     printf("Using %d processes.\n", p);
-    printf("Using a total of %d points.\n", n_global);
-    printf("Using %d time steps of size %g.\n", nsteps, dt);
+    printf("Using a total of %d points.\n", master_num_nodes);
+    printf("Using %d time steps of size %g.\n", num_dt, dt);
   }
 
   //calculate wall clock time
@@ -116,8 +122,8 @@ int main (int argc, char *argv[])
 
  //--Determine the number of nodes for local process
 
-  i_master_lo = (id*(master_num_nodes - 1))/p;
-  i_master_hi = ((id + 1)*(master_num_nodes - 1))/p;
+  i_master_min = (id*(master_num_nodes - 1))/p;
+  i_master_max = ((id + 1)*(master_num_nodes - 1))/p;
   
   if (0 < id)
   {
@@ -172,12 +178,21 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
   //n represents the nodes in the time domain
   int n;
   
+  //master array
   int i_master;
+  
+  //master array max value
   int i_master_hi;
+  
+  //master array min value
   int i_master_lo;
+  
+  //local array
   int i_local;
-  int i_local_hi;
-  int i_local_lo;
+  
+  //--local process arrays
+  int i_local_max; //max value
+  int i_local_min; //min value
   
   //used for transfer data between adjacent processes
   int ltor = 20; //left-to-right
@@ -240,16 +255,16 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
     Each process stores about 1/p of the total + 2 extra slots
     
 */
-  i_master_lo = (id*(master_num_nodes - 1))/p;
-  i_master_hi = ((id + 1)*(master_num_nodes - 1))/p;
+  i_master_min = (id*(master_num_nodes - 1))/p;
+  i_master_max = ((id + 1)*(master_num_nodes - 1))/p;
   
   if (0 < id)
   {
-    i_master_lo = i_master_lo - 1;
+    i_master_min = i_master_min - 1;
   }
 
-  i_local_lo = 0;
-  i_local_hi = i_master_hi - i_master_lo;
+  i_local_min = 0;
+  i_local_max = i_master_max - i_master_min;
 
   u0_local = (double*)malloc(local_num_nodes*sizeof(double));
   u1_local = (double*)malloc(local_num_nodes*sizeof(double));
@@ -259,18 +274,18 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
   t = 0.0;
   
   //for the master process
-  for (i_master = i_master_lo; i_master <= i_master_hi; i_master++) 
+  for (i_master = i_master_min; i_master <= i_master_max; i_master++) 
   {
     x = (double)(i_master)/(double)(master_num_nodes - 1);
     
-    i_local = i_master - i_master_lo;
+    i_local = i_master - i_master_min;
     
     //local solution
     u1_local[i_local] = exact(x, t);
   }
 
   //for the local process
-  for (i_local = i_local_lo; i_local <= i_local_hi; i_local++)
+  for (i_local = i_local_min; i_local <= i_local_max; i_local++)
   {
     u0_local[i_local] = u1_local[i_local];
   }
@@ -284,10 +299,12 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
   //For the first time step, we need to use the initial derivative information.
     if (i == 1)
     {
-      for (i_local = i_local_lo + 1; i_local < i_local_hi; i_local++) 
+      for (i_local = i_local_min + 1; i_local < i_local_max; i_local++) 
       {
-        i_master = i_master_lo + i_local;
+        i_master = i_master_min + i_local;
+        
         x = (double)(i_master)/(double)(master_num_nodes - 1);
+        
         u2_local[i_local] = 
           
           + 0.5*CFL**2*u1_local[i_local-1]
@@ -301,7 +318,7 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
 
     else
     {
-      for (i_local = i_local_lo + 1; i_local < i_local_hi; i_local++) 
+      for (i_local = i_local_min + 1; i_local < i_local_max; i_local++) 
       {
         u2_local[i_local] =
           
@@ -312,36 +329,33 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
       }
     }
 
-  //Exchange data with "left-hand" neighbour/process
-
+    //Exchange data with "left-hand" neighbour/process
     if (0 < id) 
     {
-      MPI_Send(&u2_local[i_local_lo+1], 1, MPI_DOUBLE, id - 1, rtol, MPI_COMM_WORLD);
-      MPI_Recv(&u2_local[i_local_lo], 1, MPI_DOUBLE, id - 1, ltor, MPI_COMM_WORLD, &status );
+      MPI_Send(&u2_local[i_local_min+1], 1, MPI_DOUBLE, id - 1, rtol, MPI_COMM_WORLD);
+      MPI_Recv(&u2_local[i_local_min], 1, MPI_DOUBLE, id - 1, ltor, MPI_COMM_WORLD, &status );
     }
     else
     {
       x = 0.0;
       
-      u2_local[i_local_lo] = exact(x, t);
+      u2_local[i_local_min] = exact(x, t);
     }
-/* 
-  Exchange data with "right-hand" neighbour/process
-*/
+
+    //Exchange data with "right-hand" neighbour/process
     if (id < p - 1) 
     {
-      MPI_Send(&u2_local[i_local_hi-1], 1, MPI_DOUBLE, id + 1, ltor, MPI_COMM_WORLD );
-      MPI_Recv(&u2_local[i_local_hi], 1, MPI_DOUBLE, id + 1, rtol, MPI_COMM_WORLD, &status);
+      MPI_Send(&u2_local[i_local_max-1], 1, MPI_DOUBLE, id + 1, ltor, MPI_COMM_WORLD );
+      MPI_Recv(&u2_local[i_local_max], 1, MPI_DOUBLE, id + 1, rtol, MPI_COMM_WORLD, &status);
     }
     else
     {
       x = 1.0;
-      u2_local[i_local_hi] = exact(x, t);
+      u2_local[i_local_max] = exact(x, t);
     }
-/*
-  Shift data for next time step.
-*/
-    for (i_local = i_local_lo; i_local <= i_local_hi; i_local++)
+
+    //Shift data for next time step.
+    for (i_local = i_local_min; i_local <= i_local_max; i_local++)
     {
       u0_local[i_local] = u1_local[i_local];
       u1_local[i_local] = u2_local[i_local];
@@ -357,167 +371,169 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
 }
 
 //send results from the local processes to the master process
-void collect ( int id, int p, int n_global, int n_local, int nsteps, double dt, double u_local[]) 
+void collect ( int id, int p, int master_num_nodes, int local_num_nodes, int num_dt, double dt, double u_local[]) 
 {
+  //buffer: region of a memory used to temporarily store data 
+  //while it is being moved from 1 process to another 1
   int buffer[2];
-  int collect1 = 10;
-  int collect2 = 20;
-  int i;
-  int i_master;
-  int i_master_hi;
-  int i_master_lo;
-  int i_local;
-  int i_local_hi;
-  int i_local_lo;
-  int n_local2;
   
+  //--collect variables are used to store the master process index and values
+  //collect1: contains the master index and values
+  int collect1 = 10;
+  //collect2: contains values for master process
+  int collect2 = 20;
+  
+  //counter for iterating for workers
+  int i;
+  
+  //master array
+  int i_master;
+  
+  //--master array min and max values
+  int i_master_max;
+  int i_master_min;
+  
+  //local array
+  int i_local;
+  
+  //local arrays min and max values
+  int i_local_max;
+  int i_local_min;
+  
+  //number of nodes for 2nd local process
+  int local_num_nodes_2;
+  
+  //represents the status of a reception operation
   MPI_Status status;
   
+  //time node value
   double t;
+  
+  //master solution array
   double *u_master;
+  
+  //spacial node value
   double x;
 
-  i_global_lo = (id*(n_global - 1))/p;
-  i_global_hi = ((id + 1)*(n_global - 1)/p;
+  //values for min and max values for master process arrays respectively
+  i_master_min = (id*(master_num_nodes - 1))/p;
+  i_master_max = ((id + 1)*(master_num_nodes - 1)/p;
                  
   if (0 < id)
   {
-    i_global_lo = i_global_lo - 1;
+    i_master_min = i_master_min - 1;
   }
 
+  //min and max values for local process arrays                
   i_local_lo = 0;
-  i_local_hi = i_global_hi - i_global_lo;
+  i_local_max = i_master_max - i_master_min;
 
   //master process collects local results into the master solution array         
   if ( id == 0 )
   {
-/*
-  Create the global array.
-*/
-    u_global = (double*)malloc(n_global*sizeof(double));
-/*
-  Copy the master's results into the global array.
-*/
-    for (i_local = i_local_lo; i_local <= i_local_hi; i_local++)
+
+    //Create the global array.
+    u_master = (double*)malloc(master_num_nodes*sizeof(double));
+
+    //Copy the master's results into the global array.
+    for (i_local = i_local_min; i_local <= i_local_max; i_local++)
     {
-      i_global = i_global_lo + i_local - i_local_lo;
-      u_global[i_global] = u_local[i_local];
+      i_master = i_master_min + i_local - i_local_min;
+      u_master[i_master] = u_local[i_local];
     }
-/*
-  Contact each worker.
-*/
+
+    //Contact each worker.
     for (i = 1; i < p; i++) 
     {
-/*
-  Message "collect1" contains the global index and number of values.
-*/
-      MPI_Recv(buffer, 2, MPI_INT, i, collect1, MPI_COMM_WORLD, &status);
-      i_global_lo = buffer[0];
-      n_local2 = buffer[1];
 
-      if (i_global_lo < 0)
+      //Message "collect1" contains the global index and number of values.
+      MPI_Recv(buffer, 2, MPI_INT, i, collect1, MPI_COMM_WORLD, &status);
+      
+      //index of master process
+      i_master_min = buffer[0];
+      
+      //nodes in 2nd process takes values from master process
+      local_num_nodes_2 = buffer[1];
+
+      if (i_master_lo < 0)
       {
-        fprintf(stderr, "Illegal I_GLOBAL_LO = %d\n", i_global_lo);
+        fprintf(stderr, "Illegal I_GLOBAL_LO = %d\n", i_global_min);
         exit ( 1 );
       }
-      else if (n_global <= i_global_lo + n_local2 - 1)
+      else if (master_num_nodes <= i_master_lo + n_local2 - 1)
       {
-        fprintf(stderr, "  Illegal I_GLOBAL_LO + N_LOCAL2 = %d\n", i_global_lo + n_local2);
-        exit ( 1 );
+        fprintf(stderr, "  Illegal I_GLOBAL_LO + N_LOCAL2 = %d\n", i_master_min + local_num_nodes_2);
+        exit(1);
       }
-/*
-  Message "collect2" contains the values.
-*/
-      MPI_Recv(&u_global[i_global_lo], n_local2, MPI_DOUBLE, i, collect2, MPI_COMM_WORLD, &status);
+
+      //Message "collect2" contains the values.
+      MPI_Recv(&u_master[i_master_min], local_num_nodes_2, MPI_DOUBLE, i, collect2, MPI_COMM_WORLD, &status);
     }
-/*
-  Print the results.
-*/
-    t = dt*(double)nsteps;
+    
+    //Print the results.
+    t = dt*(double)num_dt;
+    
     printf("\n");
     printf("    I      X     F(X)   Exact\n");
     printf("\n");
-    for (i_global = 0; i_global < n_global; i_global++) 
+    
+    for (i_master = 0; i_master < master_num_nodes; i_master++) 
     {
-      x = (double)(i_global)/(double)(n_global - 1);
-      printf("  %3d  %6.3f  %6.3f  %6.3f\n", i_global, x, u_global[i_global], exact (x, t));
+      x = (double)(i_master)/(double)(master_num_nodes - 1);
+      
+      printf("  %3d  %6.3f  %6.3f  %6.3f\n", i_master, x, u_master[i_master], exact(x, t));
     }
 
-    free(u_global);
+    free(u_master);
   }
-/*
-  Workers send results to process 0.
-*/
+                 
+  //Workers send results to process 0.
   else
   {
-/*
-  Message "collect1" contains the global index and number of values.
-*/
-    buffer[0] = i_global_lo;
-    buffer[1] = n_local;
+    //Message "collect1" contains the global index and number of values.
+    buffer[0] = i_master_min;
+    buffer[1] = local_num_nodes;
+    
     MPI_Send(buffer, 2, MPI_INT, 0, collect1, MPI_COMM_WORLD);
-/*
-  Message "collect2" contains the values.
-*/
-    MPI_Send(u_local, n_local, MPI_DOUBLE, 0, collect2, MPI_COMM_WORLD);
+
+    //Message "collect2" contains the values.
+    MPI_Send(u_local, local_num_nodes, MPI_DOUBLE, 0, collect2, MPI_COMM_WORLD);
   }
 
   return;
 }
-/******************************************************************************/
 
+//function to evaluate exact solution
 double exact(double x, double t)
-
-/******************************************************************************/
-/*
-  Purpose:
-
-    EXACT evaluates the exact solution
-
- 
-*/
 {
-  const double c = 1.0;
-  const double pi = 3.141592653589793;
+  const double wave_speed = 1.0;
+  
+  #define pi 3.141592653589793
+  
+  //variable holds exact solution
   double value;
 
   value = sin(2.0*pi*(x - c*t));
 
   return value;
 }
-/******************************************************************************/
 
+//for evaluating time derivative of the solution
 double dudt(double x, double t)
-
-/******************************************************************************/
-/*
-  Purpose:
-
-    DUDT evaluates the partial derivative dudt.
-
-  
-*/
 {
-  const double c = 1.0;
-  const double pi = 3.141592653589793;
+  const double wave_speed = 1.0;
+  
+  #define pi 3.141592653589793
+  
   double value;
 
   value = - 2.0*pi*c*cos(2.0*pi*(x - c*t));
 
   return value;
 }
-/******************************************************************************/
 
+//for time considerations 
 void timestamp()
-
-/******************************************************************************/
-/*
-  Purpose:
-
-    TIMESTAMP prints the current YMDHMS date as a time stamp.
-
- 
-*/
 {
 #define TIME_SIZE 40
 
