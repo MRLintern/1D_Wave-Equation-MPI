@@ -233,11 +233,10 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
     if (id == 0)
     {
       fprintf(stderr,"\n");
-      fprintf(stderr, "UPDATE - Warning!\n");
-      fprintf(stderr, "1 <= |CFL| = | c * dt / dx |.\n");
-      fprintf(stderr, "C = %g\n", c);
-      fprintf(stderr, "dT = %g\n", dt);
-      fprintf(stderr, "dX = %g\n", dx);
+      fprintf(stderr, "Courant-Friedrichs-Lewy Condition Update\n");
+      fprintf(stderr, "Wave Speed = %g\n", c);
+      fprintf(stderr, "dt = %g\n", dt);
+      fprintf(stderr, "dx = %g\n", dx);
       fprintf(stderr, "CFL = %g\n", CFL);
       fprintf(stderr, "Computation will not be stable!\n");
     }
