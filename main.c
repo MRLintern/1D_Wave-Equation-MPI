@@ -126,9 +126,9 @@ int main (int argc, char *argv[])
   
   if (0 < id)
   {
-    i_master_lo = i_master_lo - 1;
+    i_master_min = i_master_min - 1;
   }
-  local_num_nodes = i_master_hi + 1 - i_master_lo;
+  local_num_nodes = i_master_max + 1 - i_master_min;
 
   //update the local process nodes
   u1_local = update(id, p, master_num_nodes, local_num_nodes, num_dt, dt);
@@ -169,7 +169,7 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
   double CFL; 
   
   //speed of wave
-  double wave_speed;
+  double wave_speed = 1.0;
   
   //spacial step between nodes
   double dx;
@@ -181,10 +181,10 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
   int i_master;
   
   //master array max value
-  int i_master_hi;
+  int i_master_max;
   
   //master array min value
-  int i_master_lo;
+  int i_master_min;
   
   //local array
   int i_local;
@@ -219,7 +219,6 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
   solutions won't be calculated at every node in the mesh
 
 */
-  double wave_speed = 1.0;
   
   //spacial step
   dx = 1.0/(double)(master_num_nodes - 1);
@@ -234,7 +233,7 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
     {
       fprintf(stderr,"\n");
       fprintf(stderr, "Courant-Friedrichs-Lewy Condition Update\n");
-      fprintf(stderr, "Wave Speed = %g\n", c);
+      fprintf(stderr, "Wave Speed = %g\n", wave_speed);
       fprintf(stderr, "dt = %g\n", dt);
       fprintf(stderr, "dx = %g\n", dx);
       fprintf(stderr, "CFL = %g\n", CFL);
@@ -290,9 +289,11 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
   
   //time considerations. we have n nodes in the time domain
   //we now start iterating through all the time steps (4000)
-  for (n = 1; n <= num_dt; i++)
+  for (n = 1; n <= num_dt; n++)
   {
     t = dt*(double)n;
+    
+    int i;
 
   //For the first time step, we need to use the initial derivative information.
     if (i == 1)
@@ -305,9 +306,9 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
         
         u2_local[i_local] = 
           
-          + 0.5*CFL**2*u1_local[i_local-1]
-          + (1.0 - CFL**2)*u1_local[i_local] 
-          +  0.5*CFL**2*u1_local[i_local+1]
+          + 0.5*pow(CFL, 2)*u1_local[i_local-1]
+          + (1.0 - pow(CFL, 2))*u1_local[i_local] 
+          +  0.5*pow(CFL, 2)*u1_local[i_local+1]
           +  dt*dudt(x, t);
       }
     }
@@ -320,9 +321,9 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
       {
         u2_local[i_local] =
           
-          + CFL**2*u1_local[i_local-1]
-          + 2.0*(1.0 - CFL**2)*u1_local[i_local] 
-          + CFL**2*u1_local[i_local+1]
+          + pow(CFL, 2)*u1_local[i_local-1]
+          + 2.0*(1.0 - pow(CFL, 2))*u1_local[i_local] 
+          + pow(CFL, 2)*u1_local[i_local+1]
           - u0_local[i_local];
       }
     }
@@ -415,7 +416,7 @@ void collect ( int id, int p, int master_num_nodes, int local_num_nodes, int num
 
   //values for min and max values for master process arrays respectively
   i_master_min = (id*(master_num_nodes - 1))/p;
-  i_master_max = ((id + 1)*(master_num_nodes - 1)/p;
+  i_master_max = ((id + 1)*(master_num_nodes - 1))/p;
                  
   if (0 < id)
   {
@@ -423,7 +424,7 @@ void collect ( int id, int p, int master_num_nodes, int local_num_nodes, int num
   }
 
   //min and max values for local process arrays                
-  i_local_lo = 0;
+  i_local_min = 0;
   i_local_max = i_master_max - i_master_min;
 
   //master process collects local results into the master solution array         
@@ -453,14 +454,15 @@ void collect ( int id, int p, int master_num_nodes, int local_num_nodes, int num
       //nodes in 2nd process takes values from master process
       local_num_nodes_2 = buffer[1];
 
-      if (i_master_lo < 0)
+      if (i_master_min < 0)
       {
-        fprintf(stderr, "Illegal I_GLOBAL_LO = %d\n", i_global_min);
+        fprintf(stderr, "Illegal I_GLOBAL_MIN = %d\n", i_master_min);
+   
         exit ( 1 );
       }
-      else if (master_num_nodes <= i_master_lo + n_local2 - 1)
+      else if (master_num_nodes <= i_master_min + local_num_nodes_2 - 1)
       {
-        fprintf(stderr, "  Illegal I_GLOBAL_LO + N_LOCAL2 = %d\n", i_master_min + local_num_nodes_2);
+        fprintf(stderr, "  Illegal I_MASTER_MIN + N_LOCAL2 = %d\n", i_master_min + local_num_nodes_2);
         exit(1);
       }
 
@@ -511,7 +513,7 @@ double exact(double x, double t)
   //variable holds exact solution
   double value;
 
-  value = sin(2.0*pi*(x - c*t));
+  value = sin(2.0*pi*(x - wave_speed*t));
 
   return value;
 }
@@ -525,7 +527,7 @@ double dudt(double x, double t)
   
   double value;
 
-  value = - 2.0*pi*c*cos(2.0*pi*(x - c*t));
+  value = - 2.0*pi*wave_speed*cos(2.0*pi*(x - wave_speed*t));
 
   return value;
 }
@@ -550,4 +552,3 @@ void timestamp()
   
 #undef TIME_SIZE
 }
-
