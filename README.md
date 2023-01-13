@@ -92,7 +92,6 @@ set to `-O2`. This can be changed of course.
 
 ## Results
 
-The results of the calculations are printed to the screen.
-A text file of the results using 4 processes has been included.
-
+The results of the calculations can be found in the `results` folder.
+1, 2 and 4 processors were used.
 
