@@ -80,16 +80,18 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 
 ## Running the Application
 
+Running `make` will create the default appication. That is, running 1 process.
+The number of required processes to be used can be specified by `np` (see below)
+where 4 have been used. The compiler optimisation flag in the `Makefile` has been 
+set to `-O2`. This can be changed of course.
+
 * `$ git clone https://github.com/MRLintern/1D_Wave-Equation-MPI.git`
-* `$ chmod +x wave.sh`
-* `$ ./main_w`
-* or `$ bash main_w`
+* `$ make`
+* `$ mpirun -np 4 ./main_wave
+
 
 ## Results
 
 The results of the calculations are printed to `results.txt`. 
 
-## Additional
 
-Vary the number of processors used and the different compiler optimisation flags. 
-A plot with the different speed-up values using different numbers of processors and compiler optimisation flags is included.
