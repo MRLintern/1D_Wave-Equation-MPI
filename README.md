@@ -81,7 +81,7 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 ## Running the Application
 
 Running `make` will create the default appication. That is, running 1 process.
-The number of required processes to be used can be specified by `-np` (see below)
+The number of required processes to be used can be specified by `-np` (see below),
 where 4 have been used. The compiler optimisation flag in the `Makefile` has been 
 set to `-O2`. This can be changed of course.
 
