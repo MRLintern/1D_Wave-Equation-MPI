@@ -93,6 +93,6 @@ set to `-O2`. This can be changed of course.
 ## Results
 
 The results of the calculations are printed to the screen.
-These will be printed to a txt file soon.
+A text file of the results using 4 processes has been included.
 
 
