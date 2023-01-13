@@ -87,7 +87,7 @@ set to `-O2`. This can be changed of course.
 
 * `$ git clone https://github.com/MRLintern/1D_Wave-Equation-MPI.git`
 * `$ make`
-* `$ mpirun -np 4 ./main_wave
+* `$ mpirun -np 4 ./main_wave`
 
 
 ## Results
