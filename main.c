@@ -42,28 +42,12 @@ u(i,n+1) = -u(i,n-1) + 2u(i,n) + C^2(u(i+1,n) - 2u(i,n) + u(i-1,n))
 */
 
 //libraries
-#include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
-#include<time.h>
-#include<mpi.h>
-
-//--function declarations--//
-
-//function to advance/move solution to the next time-step
-double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num_dt, double dt);
-
-//function to send calculated data from the local process to the master process
-void collect(int id, int p, int master_num_nodes, int local_num_nodes, int num_dt, double dt, double u_local[]);
-
-//for evaluating time derivative of the solution
-double dudt(double x, double t);
-
-//function to evaluate exact solution
-double exact(double x, double t);
-
-//function for time considerations
-void timestamp();
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+#include <mpi.h>
+#include "utilities.h"
 
 //enter the main function
 int main (int argc, char *argv[])
