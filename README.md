@@ -4,7 +4,7 @@
 ## Background: Parallel Programming
 
 The parallel strategy used is Domain Decomposition.
-The problem (global domain) is decomposed into smaller domains (processes). "Workers" in the subdomains perform the calculations
+The problem (global domain) is decomposed into sub-domains (smaller processes). "Workers" in the sub-domains perform the calculations
 and then communicate the results with the master (global domain). This [link](https://www.mcs.anl.gov/research/projects/mpi/tutorial/mpiexmpl/src2/io/C/main.html) provides a basic example behind the Master/Slave concept.
 
 ## Background: Wave Equation (A)
@@ -83,7 +83,7 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 Running `make` will create the default appication. That is, running 1 process.
 The number of required processes to be used can be specified by `-np` (see below),
 where 4 have been used. The compiler optimisation flag in the `Makefile` has been 
-set to `-O2`. This can be changed of course.
+set to `-O3`. This can be changed of course.
 
 * `$ git clone https://github.com/MRLintern/1D_Wave-Equation-MPI.git`
 * `$ make`
