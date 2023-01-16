@@ -197,10 +197,9 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
 /*
   Determine the value of the Courant–Friedrichs–Lewy (CFL) condition:
   
-  if 1 <= CFL, the solution is unstable; warn user.
+  if 1 < CFL, the solution is unstable; warn user.
 
-  when 1 <= CFL, the time step is too large which means
-  solutions won't be calculated at every node in the mesh
+  when 1 < CFL, solutions won't be calculated at every node in the mesh; no solution u(x) will be calculated
 
 */
   
