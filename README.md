@@ -17,30 +17,29 @@ The Wave Equation takes the form:
 
         d^2 u/dt^2 - c^2 * d^2 u/dx^2 = 0
 
-        c is the speed of the wave, U is the displacement (field), t is time and x is the spatial component of the wave.
+        c is the speed of the wave, u is the displacement (field), t is time and x is the spatial component of the wave.
 
         space-interval: [x1, x2]
         time-interval: [t1, t2]
 
         Initial Conditions
 
-        U(x,t1) = U_t1(x); u(x,0) = g(x,t=0) = sin(2*pi*(x-c*t))
-        U(x,t1) = Ut_t1(x); dudt(x,0) = h(x,t=0) = -2*pi*c*cos(2*pi*(x-c*t))
-
+        u(x,t1) = u_t1(x); u(x,0) = g(x,t=0) = sin(2*pi*(x-c*t))
+        u(x,t1) = ut_t1(x); dudt(x,0) = h(x,t=0) = -2*pi*c*cos(2*pi*(x-c*t))
         
 Boundary (Dirichlet) conditions: 
 
-        U(x1,t) = U_x1(t); u(0,t) = u0(t) = sin(2*pi*(0-c*t))
-        U(x2,t) = U_x2(t); u(1,t) = u1(t) = sin(2*pi*(1-c*t))
+        u(x1,t) = u_x1(t); u(0,t) = u0(t) = sin(2*pi*(0-c*t))
+        u(x2,t) = u_x2(t); u(1,t) = u1(t) = sin(2*pi*(1-c*t))
 
 Discretized version of the wave equation:
 
-        Uxx = (U(x+dx,t) - 2U(x,t) + U(x-dx,t))/dx^2
-        Utt = (U(x,t+dt) - 2U(x,t) + U(x,t-dt))/dt^2
+        uxx = (u(x+dx,t) - 2u(x,t) + u(x-dx,t))/dx^2
+        utt = (u(x,t+dt) - 2u(x,t) + u(x,t-dt))/dt^2
 
 After some algebra and simplification, we end up with the final finite difference equation:
 
-        u(i,n+1) = -u(i,n-1) + 2u(i,n) + alpha^2(u(i+1,n) - 2u(i,n) + u(i-1,n))
+        u(i,n+1) = -u(i,n-1) + 2u(i,n) + CFL^2(u(i+1,n) - 2u(i,n) + u(i-1,n))
 
 where `n` represents the nodes in the time direction and `i` represents the nodes in the spacial direction.
 
@@ -49,17 +48,17 @@ where `n` represents the nodes in the time direction and `i` represents the node
 In the last equation, the term `alpha` was introduced. This represents the `Courant–Friedrichs–Lewy condition`.
 It takes the form:
 
-        alpha = c*dt/dx,
+        CFL = c*dt/dx,
 
 where `c` is the wave speed, `dx` the spacial step and `dt` the time step.
 This condition ensures that every node in the discretized mesh is calculated.
-The value of `alpha` needs to be in range: 
+The value of `CFL` needs to be in range: 
 
-        0.5 < alpha < 1
+        0.5 < CFL < 1
 
 If we have:
 
-        alpha => 1,
+        CFL > 1,
 
 then nodes will be missed and the solution will not be smooth and becomes unstable leading to errors. 
 
