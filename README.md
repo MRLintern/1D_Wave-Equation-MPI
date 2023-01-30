@@ -45,7 +45,7 @@ where `n` represents the nodes in the time direction and `i` represents the node
 
 ## Background: Wave Equation (B)
 
-In the last equation, the term `alpha` was introduced. This represents the `Courant–Friedrichs–Lewy condition`.
+In the last equation, the term `CFL` was introduced. This represents the `Courant–Friedrichs–Lewy condition`.
 It takes the form:
 
         CFL = c*dt/dx,
