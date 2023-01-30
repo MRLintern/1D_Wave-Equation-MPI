@@ -55,7 +55,7 @@ where `c` is the wave speed, `dx` the spacial step and `dt` the time step.
 This condition ensures that every node in the discretized mesh is calculated.
 The value of `alpha` needs to be in range: 
 
-        0.7 < alpha < 1
+        0.5 < alpha < 1
 
 If we have:
 
