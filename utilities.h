@@ -1,5 +1,3 @@
-//--function prototypes--//
-
 #ifndef UTILITIES
 #define UTILITIES
 
