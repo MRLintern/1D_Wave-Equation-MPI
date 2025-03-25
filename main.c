@@ -90,7 +90,7 @@ int main (int argc, char *argv[])
   //total number of processes
   MPI_Comm_size(MPI_COMM_WORLD, &p);
 
-  //tell user about the number processors used, the number of time steps and the total number of nodes used by the master process
+  //tell user about the number processes used, the number of time steps and the total number of nodes used by the master process
   
   if (id == 0) 
   {
