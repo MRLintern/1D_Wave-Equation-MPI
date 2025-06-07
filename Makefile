@@ -3,7 +3,7 @@ CCFLAGS=-O3 -Wall
 LDFLAGS=
 LIBS=-lm
 
-EXE=main_wave
+EXE=main
 OBJS=main.o
 
 all: $(EXE)
