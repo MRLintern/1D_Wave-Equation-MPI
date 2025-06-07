@@ -78,11 +78,13 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 * `$ sudo apt-get install mpich`
 
 ## Running the Application
-
-Running `make` will create the default appication. That is, running 1 process.
-The number of required processes to be used can be specified by `-np` (see below),
-where 4 have been used. The compiler optimisation flag in the `Makefile` has been 
-set to `-O3`. This can be changed of course.
+#### Update
+* A `shell script` called `test.sh` has been added for `Unit Testing`:
+* `$ chmod +x test.sh`.
+* `$ ./test.sh`.
+* Running `make` will create the default appication.
+* That is, running 1 process.
+* The number of required processes to be used can be specified by `-np` (see below), where 4 have been used. The compiler optimisation flag in the `Makefile` has been set to `-O3`. This can be changed of course.
 
 * `$ git clone https://github.com/MRLintern/1D_Wave-Equation-MPI.git`
 * `$ make`
