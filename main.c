@@ -50,7 +50,7 @@ u(i,n+1) = -u(i,n-1) + 2u(i,n) + C^2(u(i+1,n) - 2u(i,n) + u(i-1,n))
 #include "utilities.h"
 
 //enter the main function
-int main (int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   
   //time step
@@ -246,6 +246,7 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
   i_local_min = 0;
   i_local_max = i_master_max - i_master_min;
 
+  // allocate memory for solution(s)
   u0_local = (double*)malloc(local_num_nodes*sizeof(double));
   u1_local = (double*)malloc(local_num_nodes*sizeof(double));
   u2_local = (double*)malloc(local_num_nodes*sizeof(double));
@@ -353,7 +354,7 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
 }
 
 //send results from the local processes to the master process
-void collect ( int id, int p, int master_num_nodes, int local_num_nodes, int num_dt, double dt, double u_local[]) 
+void collect(int id, int p, int master_num_nodes, int local_num_nodes, int num_dt, double dt, double u_local[]) 
 {
   //buffer: region of a memory used to temporarily store data 
   //while it is being moved from 1 process to another 1
@@ -411,7 +412,7 @@ void collect ( int id, int p, int master_num_nodes, int local_num_nodes, int num
   i_local_max = i_master_max - i_master_min;
 
   //master process collects local results into the master solution array         
-  if ( id == 0 )
+  if (id == 0)
   {
 
     //Create the global array.
