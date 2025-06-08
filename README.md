@@ -3,8 +3,8 @@
 
 ## Background: Parallel Programming
 
-The parallel strategy used is Domain Decomposition.
-The problem (global domain) is decomposed into sub-domains (smaller processes). "Workers" in the sub-domains perform the calculations
+The parallel strategy used is ___Domain Decomposition___.
+The problem (__global domain__) is decomposed into ___sub-domains___ (smaller processes). ___"Workers"___ in the sub-domains perform the calculations
 and then communicate the results with the master (global domain). This [link](https://www.mcs.anl.gov/research/projects/mpi/tutorial/mpiexmpl/src2/io/C/main.html) provides a basic example behind the Master/Slave concept.
 
 ## Background: Wave Equation (A)
