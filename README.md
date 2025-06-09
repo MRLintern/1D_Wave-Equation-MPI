@@ -68,7 +68,7 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 
 * Operating Systems: `Ubuntu 20.04`.
 * Compiler: `mpicc`.
-* `mpich` so `MPI` can be used.
+* `MPICC` so `MPI` can be used.
 * Text Editor. Any can be used. E.g. `Visual Studio Code`, `Vim`, `Emacs`, `gedit` etc.
 
 ## Installing MPI
