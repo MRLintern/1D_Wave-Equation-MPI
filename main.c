@@ -277,10 +277,10 @@ double* update(int id, int p, int master_num_nodes, int local_num_nodes, int num
   {
     t = dt*(double)n;
     
-    int i;
+    //int i;
 
   //For the first time step, we need to use the initial derivative information.
-    if (i == 1)
+    if (n == 1)
     {
       for (i_local = i_local_min + 1; i_local < i_local_max; i_local++) 
       {
