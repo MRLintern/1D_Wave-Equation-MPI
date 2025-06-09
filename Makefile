@@ -1,23 +1,26 @@
-CC=mpicc
-CCFLAGS=-O3 -Wall
-LDFLAGS=
-LIBS=-lm
+CC = mpicc
+CFLAGS = -std=c11 -Wall -Wextra -O2
+SRC = main.c
+TARGET = bin/main
+RESULTS_DIR = results
+TEST_SCRIPT = tests/test.sh
 
-EXE=main
-OBJS=main.o
+.PHONY: all test clean run
 
-all: $(EXE)
+all: test $(TARGET)
 
-main.o: main.c
+$(TARGET): $(SRC)
+	mkdir -p bin
+	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
 
-$(OBJS): C_COMPILER := $(CC)
+test:
+	@echo "Running Unit Tests..."
+	chmod +x $(TEST_SCRIPT)
+	./$(TEST_SCRIPT)
 
-$(EXE): $(OBJS)
-	$(CC) $(CCFLAGS) $(OBJS) -o $@ $(LDFLAGS) $(LIBS)
-	
-%.o: %.c
-	$(C_COMPILER) $(CCFLAGS) -c $< -o $@
-	
-.PHONY: clean
+run: $(TARGET)
+	mkdir -p $(RESULTS_DIR)
+	mpirun -np 2 $(TARGET) > $(RESULTS_DIR)/results.txt
+
 clean:
-	-/bin/rm -f $(EXE) a.out *.o *
+	rm -rf bin $(RESULTS_DIR)/results.txt wave_test_output.txt
