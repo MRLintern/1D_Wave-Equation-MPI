@@ -78,17 +78,15 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 * `$ sudo apt-get install mpich`
 
 ## Running the Application
-#### Update
-* A `shell script` called `test.sh` has been added for `Unit Testing`:
-* `$ chmod +x test.sh`.
-* `$ ./test.sh`.
-* Running `make` will create the default appication.
-* That is, running 1 process.
+
 * The number of required processes to be used can be specified by `-np` (see below), where 4 have been used. The compiler optimisation flag in the `Makefile` has been set to `-O3`. This can be changed of course.
+* You can run `make test` to run the `Unit Test Script` prior to building the final software.
+* This will generate a results file (`computed vs. analytic data`) called `wave_test_output.txt` within the `results` directory; the `results` directory is built by `Make`.
 
 * `$ git clone https://github.com/MRLintern/1D_Wave-Equation-MPI.git`
 * `$ make`
-* `$ mpirun -np 4 ./main_wave`
+* My machine has `4 CPUs`, so change accordingly.
+* `$ mpirun -np 4 ./main`
 
 
 ## Results
