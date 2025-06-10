@@ -93,6 +93,7 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 
 ## Results
 
-The results of the calculations can be found in the `results` folder.
-1, 2 and 4 processors were used.
+* The results of the calculations can be found in the `results` folder.
+* 1, 2 and 4 processors were used.
+* Note: this is an __example folder__. When you `make` the application, a folder called `results` is generated with the output data.
 
