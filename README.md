@@ -1,5 +1,5 @@
 ## 1D_Wave-Equation-MPI
-1D Wave Equation Discretized using Finite Differences and Solved via Parallelizing the Jacobi Method with MPI
+* __1D Wave Equation__ Discretized using __Finite Differences__ and Solved via __Parallelizing__ the ___Jacobi Method___ with __MPI__.
 
 ## Background: Parallel Programming
 
@@ -9,15 +9,17 @@ and then communicate the results with the master (global domain). This [link](ht
 
 ## Background: Wave Equation (A)
 
-The Wave Equation takes the form:
+* The __Wave Equation__ takes the form:
 
         Utt = c^2*Uxx
+* `Utt` is the 2nd time derivative of the `displacement field`.
+* `Uxx` is the 2nd spacial derivative of the `displacement field`.
 
-1D version of the Wave Equation:
+* The 1D version of the Wave Equation is:
 
         d^2 u/dt^2 - c^2 * d^2 u/dx^2 = 0
 
-        c is the speed of the wave, u is the displacement (field), t is time and x is the spatial component of the wave.
+        `c` is the `speed of the wave`, `u` is the `displacement` (`field`), `t` is `time` and `x` is the `spatial component` of the `wave`.
 
         space-interval: [x1, x2]
         time-interval: [t1, t2]
@@ -27,36 +29,36 @@ The Wave Equation takes the form:
         u(x,t1) = u_t1(x); u(x,0) = g(x,t=0) = sin(2*pi*(x-c*t))
         u(x,t1) = ut_t1(x); dudt(x,0) = h(x,t=0) = -2*pi*c*cos(2*pi*(x-c*t))
         
-Boundary (Dirichlet) conditions: 
+* Boundary (Dirichlet) conditions: 
 
         u(x1,t) = u_x1(t); u(0,t) = u0(t) = sin(2*pi*(0-c*t))
         u(x2,t) = u_x2(t); u(1,t) = u1(t) = sin(2*pi*(1-c*t))
 
-Discretized version of the wave equation:
+* Discretized version of the wave equation:
 
         uxx = (u(x+dx,t) - 2u(x,t) + u(x-dx,t))/dx^2
         utt = (u(x,t+dt) - 2u(x,t) + u(x,t-dt))/dt^2
 
-After some algebra and simplification, we end up with the final finite difference equation:
+* After some algebra and simplification, we end up with the final finite difference equation:
 
-        u(i,n+1) = -u(i,n-1) + 2u(i,n) + CFL^2(u(i+1,n) - 2u(i,n) + u(i-1,n))
+        u(i,n+1) = -u(i,n-1) + 2u(i,n) + CFL^2(u(i+1,n) - 2u(i,n) + u(i-1,n)),
 
 where `n` represents the nodes in the time direction and `i` represents the nodes in the spacial direction.
 
 ## Background: Wave Equation (B)
 
-In the last equation, the term `CFL` was introduced. This represents the `Courant–Friedrichs–Lewy condition`.
-It takes the form:
+* In the last equation, the term `CFL` was introduced. This represents the `Courant–Friedrichs–Lewy condition`.
+* It takes the form:
 
         CFL = c*dt/dx,
 
 where `c` is the wave speed, `dx` the spacial step and `dt` the time step.
-This condition ensures that every node in the discretized mesh is calculated.
-The value of `CFL` needs to be in range: 
+* This condition ensures that every node in the discretized mesh is calculated.
+* The value of `CFL` needs to be in range: 
 
         0.5 < CFL < 1
 
-If we have:
+* If we have:
 
         CFL > 1,
 
