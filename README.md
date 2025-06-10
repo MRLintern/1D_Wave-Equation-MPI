@@ -15,11 +15,11 @@ and then communicate the results with the master (global domain). This [link](ht
 * `Utt` is the 2nd time derivative of the `displacement field`.
 * `Uxx` is the 2nd spacial derivative of the `displacement field`.
 
-* The 1D version of the Wave Equation is:
+* The __1D version__ of the __Wave Equation__ is:
 
         d^2 u/dt^2 - c^2 * d^2 u/dx^2 = 0
 
-        `c` is the `speed of the wave`, `u` is the `displacement` (`field`), `t` is `time` and `x` is the `spatial component` of the `wave`.
+        c is the speed of the wave, u is the displacement (field), t is time and x is the spatial component of the wave.
 
         space-interval: [x1, x2]
         time-interval: [t1, t2]
