@@ -87,6 +87,8 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 * `$ make`
 * My machine has `4 CPUs`, so change accordingly.
 * `$ mpirun -np 4 ./main`
+* To 'clean up' the application run: `$ make clean`. This will get rid of `bin`, `results/results.txt` and  `wave_test_output.txt`.
+* Note: the executable `main` in the parent directory will still be present. This is due to `main.c` being compiled in the `tests` (for `unit testing`) and parent directories.
 
 
 ## Results
