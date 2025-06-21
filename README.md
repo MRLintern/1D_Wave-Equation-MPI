@@ -1,6 +1,9 @@
 ## 1D_Wave-Equation-MPI
 * __1D Wave Equation__ Discretized using __Finite Differences__ and Solved via __Parallelizing__ the ___Jacobi Method___ with __MPI__.
 
+## TODO
+* Create a `Python` script which creates 2 sub-plots: `u(x)`, the wavefield and the error `u(x) - u_exact(x)`.
+
 ## Background: Parallel Programming
 
 The parallel strategy used is ___Domain Decomposition___.
