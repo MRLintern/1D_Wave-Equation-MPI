@@ -1,17 +1,18 @@
 ## 1D_Wave-Equation-MPI
+---
 * __1D Wave Equation__ Discretized using __Finite Differences__ and Solved via __Parallelizing__ the ___Jacobi Method___ with __MPI__.
 
-## TODO
-* Create a `Python` script which creates 2 sub-plots: `u(x)`, the wavefield and the error `u(x) - u_exact(x)`.
-
+## Update:
+---
+* The software is currently being refactored into Modern and modular form.
 ## Background: Parallel Programming
-
+---
 The parallel strategy used is ___Domain Decomposition___.
 The problem (__global domain__) is decomposed into ___sub-domains___ (smaller processes). ___"Workers"___ in the sub-domains perform the calculations
 and then communicate the results with the master (global domain). This [link](https://www.mcs.anl.gov/research/projects/mpi/tutorial/mpiexmpl/src2/io/C/main.html) provides a basic example behind the Master/Slave concept.
 
 ## Background: Wave Equation (A)
-
+---
 * The __Wave Equation__ takes the form:
 
         Utt = c^2*Uxx
@@ -49,7 +50,7 @@ and then communicate the results with the master (global domain). This [link](ht
 where `n` represents the nodes in the time direction and `i` represents the nodes in the spacial direction.
 
 ## Background: Wave Equation (B)
-
+---
 * In the last equation, the term `CFL` was introduced. This represents the `Courant–Friedrichs–Lewy condition`.
 * It takes the form:
 
@@ -70,20 +71,20 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 
 
 ## Requirements
-
+---
 * Operating Systems: `Ubuntu 20.04`.
 * Compiler: `mpicc`.
 * `MPICC` so `MPI` can be used.
 * Text Editor. Any can be used. E.g. `Visual Studio Code`, `Vim`, `Emacs`, `gedit` etc.
 
 ## Installing MPI
-
+---
 `MPI`can be downloaded [here](https://www.mpich.org/) or at the command line (see below).
 
 * `$ sudo apt-get install mpich`
 
 ## Running the Application
-
+---
 * The number of required processes to be used can be specified by `-np` (see below), where 4 have been used. The compiler optimisation flag in the `Makefile` has been set to `-O3`. This can be changed of course.
 * You can run `make test` to run the `Unit Test Script` prior to building the final software.
 * This will generate a results file (`computed vs. analytic data`) called `wave_test_output.txt` within the `results` directory; the `results` directory is built by `Make`.
