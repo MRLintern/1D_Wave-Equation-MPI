@@ -1,17 +1,25 @@
 ## 1D_Wave-Equation-MPI
 ---
-* __1D Wave Equation__ Discretized using __Finite Differences__ and Solved via __Parallelizing__ the ___Jacobi Method___ with __MPI__.
-
+* This project models the __1D wave equation__ using __MPI__ (__Message Passing Interface__) for parallel computation.
+* The main goal is to demonstrate how __distributed-memory parallelism__ can be used to solve __partial differential equations (PDEs)__ like the wave equation efficiently.
 ## Update:
 ---
 * The software is currently being refactored into Modern and modular form.
 ## Background: Parallel Programming
 ---
-The parallel strategy used is ___Domain Decomposition___.
-The problem (__global domain__) is decomposed into ___sub-domains___ (smaller processes). ___"Workers"___ in the sub-domains perform the calculations
+* The parallel strategy used is ___Domain Decomposition___.
+* The problem (__global domain__) is decomposed into ___sub-domains___ (smaller processes). ___"Workers"___ in the sub-domains perform the calculations
 and then communicate the results with the master (global domain). This [link](https://www.mcs.anl.gov/research/projects/mpi/tutorial/mpiexmpl/src2/io/C/main.html) provides a basic example behind the Master/Slave concept.
+* Each process updates its section of the __domain independently__ but must __exchange__ __"ghost" cell data__ to compute __spatial derivatives__.
 
-## Background: Wave Equation (A)
+#### Why Use Domain Decomposition?
+
+* Reduces the memory usage per process.
+* Enables __concurrent computations__.
+* Minimises idle time by __overlapping computatiion__ and __communication__.
+
+
+## The Wave Equation
 ---
 * The __Wave Equation__ takes the form:
 
@@ -33,7 +41,7 @@ and then communicate the results with the master (global domain). This [link](ht
         u(x,t1) = u_t1(x); u(x,0) = g(x,t=0) = sin(2*pi*(x-c*t))
         u(x,t1) = ut_t1(x); dudt(x,0) = h(x,t=0) = -2*pi*c*cos(2*pi*(x-c*t))
         
-* Boundary (Dirichlet) conditions: 
+* Boundary (__Dirichlet__) conditions: 
 
         u(x1,t) = u_x1(t); u(0,t) = u0(t) = sin(2*pi*(0-c*t))
         u(x2,t) = u_x2(t); u(1,t) = u1(t) = sin(2*pi*(1-c*t))
@@ -43,13 +51,13 @@ and then communicate the results with the master (global domain). This [link](ht
         uxx = (u(x+dx,t) - 2u(x,t) + u(x-dx,t))/dx^2
         utt = (u(x,t+dt) - 2u(x,t) + u(x,t-dt))/dt^2
 
-* After some algebra and simplification, we end up with the final finite difference equation:
+* After some algebra and simplification, we end up with the final __finite difference equation__:
 
         u(i,n+1) = -u(i,n-1) + 2u(i,n) + CFL^2(u(i+1,n) - 2u(i,n) + u(i-1,n)),
 
 where `n` represents the nodes in the time direction and `i` represents the nodes in the spacial direction.
 
-## Background: Wave Equation (B)
+## The Courant–Friedrichs–Lewy Condition
 ---
 * In the last equation, the term `CFL` was introduced. This represents the `Courant–Friedrichs–Lewy condition`.
 * It takes the form:
@@ -79,7 +87,7 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 
 ## Installing MPI
 ---
-`MPI`can be downloaded [here](https://www.mpich.org/) or at the command line (see below).
+`MPI`can be downloaded [here](https://www.mpich.org/) or at the command line using Ubuntu's package manager:
 
 * `$ sudo apt-get install mpich`
 
@@ -91,7 +99,7 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 
 * `$ git clone https://github.com/MRLintern/1D_Wave-Equation-MPI.git`
 * `$ make`
-* My machine has `4 CPUs`, so change accordingly.
+* My machine has a total of `4 CPUs`, so change accordingly.
 * `$ mpirun -np 4 ./main`
 * To 'clean up' the application run: `$ make clean`. This will get rid of `bin`, `results/results.txt` and  `wave_test_output.txt`.
 * Note: the executable `main` in the parent directory will still be present. This is due to `main.c` being compiled in the `tests` (for `unit testing`) and parent directories.
