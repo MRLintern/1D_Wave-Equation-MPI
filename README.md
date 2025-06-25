@@ -107,6 +107,5 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 
 ## Results
 
-* The results of the calculations can be found in the `results` folder.
-* 1, 2, 3 and 4 processors were used.
+* TODO: new results to be generate; a `Python` script which plots the `computed u(x)` and the `u_exact(x)` values for processor numbers; `1,2,3 & 4`. 
 
