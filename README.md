@@ -96,6 +96,6 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 * TODO: New instructions to be added once the new software has been developed.
 
 ## Results
-
+---
 * TODO: new results to be generate; a `Python` script which plots the `computed u(x)` and the `u_exact(x)` values for processor numbers; `1,2,3 & 4`. 
 
