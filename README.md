@@ -93,17 +93,7 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 
 ## Running the Application
 ---
-* The number of required processes to be used can be specified by `-np` (see below), where 4 have been used. The compiler optimisation flag in the `Makefile` has been set to `-O3`. This can be changed of course.
-* You can run `make test` to run the `Unit Test Script` prior to building the final software.
-* This will generate a results file (`computed vs. analytic data`) called `wave_test_output.txt` within the `results` directory; the `results` directory is built by `Make`.
-
-* `$ git clone https://github.com/MRLintern/1D_Wave-Equation-MPI.git`
-* `$ make`
-* My machine has a total of `4 CPUs`, so change accordingly.
-* `$ mpirun -np 4 ./main`
-* To 'clean up' the application run: `$ make clean`. This will get rid of `bin`, `results/results.txt` and  `wave_test_output.txt`.
-* Note: the executable `main` in the parent directory will still be present. This is due to `main.c` being compiled in the `tests` (for `unit testing`) and parent directories.
-
+* TODO: New instructions to be added once the new software has been developed.
 
 ## Results
 
