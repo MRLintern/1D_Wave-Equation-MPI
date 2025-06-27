@@ -102,6 +102,7 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 * `$ mpirun -np 2 ./test`
 * Once happy, clean up the directory. I.e. get rid of the binary file and the `.o` files.
 * `$ make clean`
+### Main Software
 * TODO: New instructions to be added once the new software has been developed.
 
 ## Results
