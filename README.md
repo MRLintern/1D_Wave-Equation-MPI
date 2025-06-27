@@ -93,6 +93,15 @@ then nodes will be missed and the solution will not be smooth and becomes unstab
 
 ## Running the Application
 ---
+### Unit Testing
+* A smaller version of the software can be found in the `tests` directory for unit testing purposes.
+* No results are produced, only the functions `update()` and `collect()`, which are tested.
+* The software was tested on `2 processors`.
+#### Instructions for Unit Testing:
+* `$ make test`
+* `$ mpirun -np 2 ./test`
+* Once happy, clean up the directory. I.e. get rid of the binary file and the `.o` files.
+* `$ make clean`
 * TODO: New instructions to be added once the new software has been developed.
 
 ## Results
