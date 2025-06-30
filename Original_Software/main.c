@@ -1,6 +1,6 @@
 /*
 
-Program solves the 2D Wave Equation.
+Program solves the 1D Wave Equation.
 Equation is discretized using a Finite Difference Stencil.
 The resulting System of Algebraic Equations is solved
 using the Jacobi Iterative Method which is parallelized using MPI.
